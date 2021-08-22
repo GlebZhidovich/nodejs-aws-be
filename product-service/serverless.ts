@@ -1,6 +1,5 @@
 import type { AWS } from '@serverless/typescript';
 
-import hello from '@functions/hello';
 import getProductsList from '@functions/getProductsList';
 import getProductsById from '@functions/getProductsById';
 
