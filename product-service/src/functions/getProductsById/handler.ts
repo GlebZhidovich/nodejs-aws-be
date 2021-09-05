@@ -14,7 +14,9 @@ const getProductsById = async ({ pathParameters }): Promise<{ product: Product }
 
   try {
     const query = {
-      text: 'SELECT * FROM products WHERE id = $1',
+      text: `select p.id, p.title, p.description, p.price, stocks.count
+            from products as p left outer join stocks
+            on p.id = stocks.product_id where p.id = $1;`,
       values: [productId]
     };
     const result = await client.query(query);

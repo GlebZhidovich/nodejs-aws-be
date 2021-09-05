@@ -9,7 +9,9 @@ const getProductsList = async (): Promise<Product[]> => {
   await client.connect();
 
   try {
-    const query = 'SELECT * FROM products';
+    const query = `select p.id, p.title, p.description, p.price, stocks.count
+                  from products as p left outer join stocks
+                  on p.id = stocks.product_id;`;
     const result = await client.query(query);
     const { rows } = result;
     return rows;
