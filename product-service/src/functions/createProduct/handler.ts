@@ -15,8 +15,8 @@ const createProduct = async ({ body }: { body: Product }): Promise<string> => {
   try {
     await client.connect();
 
-    const { title, description, price, count } = body;
-    const id = uuidv4();
+    const { id: productId, title, description, price, count } = body;
+    const id = productId || uuidv4();
 
     await client.query('BEGIN');
     const queryProduct = {

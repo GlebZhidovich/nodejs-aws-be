@@ -7,6 +7,10 @@ import MiddlewareFunction = middy.MiddlewareFunction;
 
 export const apiGatewayResponseMiddleware = (options: { enableErrorLogger?: boolean } = {}) => {
 
+  const before: MiddlewareFunction<APIGatewayProxyEvent, any> = async (request) => {
+    console.log(request);
+  }
+
   const after: MiddlewareFunction<APIGatewayProxyEvent, any> = async (request) => {
     if (!request.event?.httpMethod || request.response === undefined || request.response === null) {
       return;
@@ -40,6 +44,7 @@ export const apiGatewayResponseMiddleware = (options: { enableErrorLogger?: bool
   }
 
   return {
+    before,
     after,
     onError,
   };
