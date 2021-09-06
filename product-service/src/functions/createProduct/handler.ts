@@ -1,35 +1,45 @@
-import { Client } from 'pg';
+import { dbOptions } from '@functions/dboptions';
 import { Product } from '@functions/types';
 import { AppError } from '@libs/appError';
 import { middyfy } from '@libs/lambda';
+import {
+  ReasonPhrases,
+  StatusCodes
+} from 'http-status-codes';
+import { Client } from 'pg';
 import 'source-map-support/register';
-import { dbOptions } from '@functions/dboptions';
+import { v4 as uuidv4 } from 'uuid';
 
+const createProduct = async ({ body }: { body: Product }): Promise<string> => {
+  const client = new Client(dbOptions);
+  try {
+    await client.connect();
 
-const createProduct = async ({ body, ...rest }): Promise<string> => {
-  console.log(body);
+    const { title, description, price, count } = body;
+    const id = uuidv4();
 
-  // const { productId } = pathParameters;
-
-  // const client = new Client(dbOptions)
-  // await client.connect();
-
-  // try {
-  //   const query = {
-  //     text: `select p.id, p.title, p.description, p.price, stocks.count
-  //           from products as p left outer join stocks
-  //           on p.id = stocks.product_id where p.id = $1;`,
-  //     values: [productId]
-  //   };
-  //   const result = await client.query(query);
-  //   const { rows } = result;
-  //   return rows;
-  // } catch (err) {
-  //   console.log(err);
-  // } finally {
-  //   client.end();
-  // }
-  return body;
+    await client.query('BEGIN');
+    const queryProduct = {
+      text: `insert into products (id, title, description, price) values
+              ($1, $2, $3, $4)`,
+      values: [id, title, description, price]
+    };
+    await client.query(queryProduct);
+    const queryStock = {
+      text: `insert into stocks (product_id, count) values
+              ($1, $2)`,
+      values: [id, count]
+    };
+    await client.query(queryStock);
+    await client.query('COMMIT');
+    return id;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.log('Error during database request executing:', err);
+    throw new AppError(ReasonPhrases.INTERNAL_SERVER_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
+  } finally {
+    client.end();
+  }
 }
 
 export const main = middyfy(createProduct);
