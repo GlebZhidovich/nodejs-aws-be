@@ -6,7 +6,8 @@ export default {
     {
       http: {
         method: 'get',
-        path: 'import/{fileName}',
+        path: 'import/{filename}',
+        cors: true,
       }
     }
   ]
