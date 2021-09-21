@@ -11,7 +11,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { BUCKET_NAME } from '../constats';
-import * as csv from 'csv-parser';
+import csv from 'csv-parser';
 import { Client } from 'pg';
 import { dbOptions } from '../dboptions';
 import { Product } from '../types';
