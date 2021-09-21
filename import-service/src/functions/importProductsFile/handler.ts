@@ -5,12 +5,9 @@ import {
   S3ClientConfig,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
-import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
 import 'source-map-support/register';
-
-const BUCKET_NAME = 'import-service-bucket-app';
+import { BUCKET_NAME } from '../constats';
 
 const importProductsFile = async ({
   pathParameters,

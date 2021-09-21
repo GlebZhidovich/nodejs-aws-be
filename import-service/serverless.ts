@@ -1,7 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
-import hello from '@functions/hello';
 import importProductsFile from '@functions/importProductsFile';
+import importFileParser from '@functions/importFileParser';
 
 const serverlessConfiguration: AWS = {
   service: 'import-service',
@@ -18,13 +18,13 @@ const serverlessConfiguration: AWS = {
       {
         Effect: 'Allow',
         Action: 's3:ListBucket',
-        Resource: 'arn:aws:s3:::import-service-bucket-app'
+        Resource: 'arn:aws:s3:::import-service-bucket-app',
       },
       {
         Effect: 'Allow',
         Action: 's3:*',
-        Resource: 'arn:aws:s3:::import-service-bucket-app/*'
-      }
+        Resource: 'arn:aws:s3:::import-service-bucket-app/*',
+      },
     ],
     name: 'aws',
     runtime: 'nodejs14.x',
@@ -40,7 +40,7 @@ const serverlessConfiguration: AWS = {
     lambdaHashingVersion: '20201221',
   },
   // import the function via paths
-  functions: { hello, importProductsFile },
+  functions: { importProductsFile, importFileParser },
 };
 
 module.exports = serverlessConfiguration;
