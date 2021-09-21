@@ -10,7 +10,7 @@ import { Client } from 'pg';
 import 'source-map-support/register';
 import { v4 as uuidv4 } from 'uuid';
 
-const createProduct = async ({ body }: { body: Product }): Promise<string> => {
+const createProduct = async ({ body }: { body: Product }): Promise<Product> => {
   const client = new Client(dbOptions);
   try {
     await client.connect();
@@ -25,6 +25,7 @@ const createProduct = async ({ body }: { body: Product }): Promise<string> => {
       values: [id, title, description, price]
     };
     await client.query(queryProduct);
+
     const queryStock = {
       text: `insert into stocks (product_id, count) values
               ($1, $2)`,
@@ -32,7 +33,7 @@ const createProduct = async ({ body }: { body: Product }): Promise<string> => {
     };
     await client.query(queryStock);
     await client.query('COMMIT');
-    return id;
+    return { id, title, description, price, count };
   } catch (err) {
     await client.query('ROLLBACK');
     console.log('Error during database request executing:', err);
