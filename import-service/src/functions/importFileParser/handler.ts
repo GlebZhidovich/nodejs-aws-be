@@ -15,6 +15,8 @@ import csv from 'csv-parser';
 import { Client } from 'pg';
 import { dbOptions } from '../dboptions';
 import { Product } from '../types';
+import Joi from 'joi';
+import { AppError } from '../../libs/appError';
 
 const streamToArray = (stream): any =>
   new Promise((resolve, reject) => {
@@ -46,7 +48,18 @@ const saveToDb = async (products: Product[]) => {
     await client.connect();
 
     for (const product of products) {
+      const schema = Joi.object({
+        title: Joi.string().required(),
+        description: Joi.string().required(),
+        price: Joi.number().required(),
+      });
+      const { error } = schema.validate(product);
+      if (error) {
+        throw new AppError(error.details[0].message, 400);
+      }
+
       const { title, description, price } = product;
+
       const query = {
         text: `insert into products (title, description, price) values
                 ($1, $2, $3)`,
@@ -57,6 +70,7 @@ const saveToDb = async (products: Product[]) => {
     }
   } catch (err) {
     console.log(err);
+    throw err;
   } finally {
     client.end();
   }
