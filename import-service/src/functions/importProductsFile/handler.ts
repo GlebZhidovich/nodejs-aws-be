@@ -7,12 +7,21 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { middyfy } from '@libs/lambda';
 import 'source-map-support/register';
+import { AppError } from '../../libs/appError';
 import { BUCKET_NAME } from '../constats';
+
+export const checkIsCsvFile = (filename: string): boolean => {
+  const arrNames = filename.split('.');
+  return arrNames[arrNames.length - 1] === 'csv';
+};
 
 const importProductsFile = async ({
   pathParameters,
 }): Promise<{ url: string }> => {
   const { filename } = pathParameters;
+  if (!checkIsCsvFile(filename)) {
+    throw new AppError('Wrong file format', 400);
+  }
   const clientParams: S3ClientConfig = {
     region: 'eu-west-1',
   };
