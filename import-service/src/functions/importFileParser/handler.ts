@@ -86,12 +86,12 @@ const saveToSQS = async (products: Product[]) => {
 
   for (const product of products) {
     const input: SendMessageCommandInput = {
-      QueueUrl: '',
+      QueueUrl: process.env.SQS_URL,
       MessageBody: JSON.stringify(product),
     };
     const command = new SendMessageCommand(input);
     const response = await client.send(command);
-    console.log(response);
+    console.log('response', response);
   }
 };
 
