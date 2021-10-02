@@ -10,6 +10,11 @@ import {
   DeleteObjectCommandInput,
   S3Client,
 } from '@aws-sdk/client-s3';
+import {
+  SQSClient,
+  SendMessageCommand,
+  SendMessageCommandInput,
+} from '@aws-sdk/client-sqs';
 import { BUCKET_NAME } from '../constats';
 import csv from 'csv-parser';
 import { Client } from 'pg';
@@ -69,14 +74,28 @@ const saveToDb = async (products: Product[]) => {
       console.log(product);
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     throw err;
   } finally {
     client.end();
   }
 };
 
-const copyAndremoveFile = async (records, client) => {
+const saveToSQS = async (products: Product[]) => {
+  const client = new SQSClient({ region: 'eu-west-1' });
+
+  for (const product of products) {
+    const input: SendMessageCommandInput = {
+      QueueUrl: '',
+      MessageBody: JSON.stringify(product),
+    };
+    const command = new SendMessageCommand(input);
+    const response = await client.send(command);
+    console.log(response);
+  }
+};
+
+const copyAndRemoveFile = async (records, client) => {
   for (const record of records) {
     const copyObjectParams: CopyObjectCommandInput = {
       Bucket: BUCKET_NAME,
@@ -102,8 +121,9 @@ const importProductsFile = async ({ Records }) => {
   };
   const client = new S3Client(clientParams);
   const products = await getProducts(Records, client);
-  await saveToDb(products);
-  await copyAndremoveFile(Records, client);
+  // await saveToDb(products);
+  await saveToSQS(products);
+  await copyAndRemoveFile(Records, client);
 };
 
 export const main = middyfy(importProductsFile);
