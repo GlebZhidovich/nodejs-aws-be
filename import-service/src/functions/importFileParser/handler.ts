@@ -1,27 +1,23 @@
-import { middyfy } from '@libs/lambda';
-import 'source-map-support/register';
 import {
-  GetObjectCommand,
-  GetObjectCommandInput,
   CopyObjectCommand,
   CopyObjectCommandInput,
-  S3ClientConfig,
   DeleteObjectCommand,
   DeleteObjectCommandInput,
+  GetObjectCommand,
+  GetObjectCommandInput,
   S3Client,
+  S3ClientConfig,
 } from '@aws-sdk/client-s3';
 import {
-  SQSClient,
   SendMessageCommand,
   SendMessageCommandInput,
+  SQSClient,
 } from '@aws-sdk/client-sqs';
-import { BUCKET_NAME } from '../constats';
+import { middyfy } from '@libs/lambda';
 import csv from 'csv-parser';
-import { Client } from 'pg';
-import { dbOptions } from '../dboptions';
+import 'source-map-support/register';
+import { BUCKET_NAME, REGION } from '../constats';
 import { Product } from '../types';
-import Joi from 'joi';
-import { AppError } from '../../libs/appError';
 
 const streamToArray = (stream): any =>
   new Promise((resolve, reject) => {
@@ -47,42 +43,8 @@ const getProducts = async (records, client): Promise<Product[]> => {
   }
 };
 
-const saveToDb = async (products: Product[]) => {
-  const client = new Client(dbOptions);
-  try {
-    await client.connect();
-
-    for (const product of products) {
-      const schema = Joi.object({
-        title: Joi.string().required(),
-        description: Joi.string().required(),
-        price: Joi.number().required(),
-      });
-      const { error } = schema.validate(product);
-      if (error) {
-        throw new AppError(error.details[0].message, 400);
-      }
-
-      const { title, description, price } = product;
-
-      const query = {
-        text: `insert into products (title, description, price) values
-                ($1, $2, $3)`,
-        values: [title, description, price],
-      };
-      await client.query(query);
-      console.log(product);
-    }
-  } catch (err) {
-    console.error(err);
-    throw err;
-  } finally {
-    client.end();
-  }
-};
-
 const saveToSQS = async (products: Product[]) => {
-  const client = new SQSClient({ region: 'eu-west-1' });
+  const client = new SQSClient({ region: REGION });
 
   for (const product of products) {
     const input: SendMessageCommandInput = {
@@ -117,7 +79,7 @@ const copyAndRemoveFile = async (records, client) => {
 
 const importProductsFile = async ({ Records }) => {
   const clientParams: S3ClientConfig = {
-    region: 'eu-west-1',
+    region: REGION,
   };
   const client = new S3Client(clientParams);
   const products = await getProducts(Records, client);

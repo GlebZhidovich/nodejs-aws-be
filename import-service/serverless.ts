@@ -2,6 +2,7 @@ import type { AWS } from '@serverless/typescript';
 
 import importProductsFile from '@functions/importProductsFile';
 import importFileParser from '@functions/importFileParser';
+import catalogBatchProcess from '@functions/catalogBatchProcess';
 
 const serverlessConfiguration: AWS = {
   service: 'import-service',
@@ -25,6 +26,22 @@ const serverlessConfiguration: AWS = {
         Action: 's3:*',
         Resource: 'arn:aws:s3:::import-service-bucket-app/*',
       },
+      {
+        Effect: 'Allow',
+        Action: 'sqs:*',
+        Resource: [
+          {
+            'Fn::GetAtt': ['SQSQueue', 'Arn'],
+          },
+        ],
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sns:*',
+        Resource: {
+          Ref: 'SNSTopic',
+        },
+      },
     ],
     name: 'aws',
     runtime: 'nodejs14.x',
@@ -36,11 +53,43 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      SQS_URL: {
+        Ref: 'SQSQueue',
+      },
+      SNS_ARN: {
+        Ref: 'SNSTopic',
+      },
     },
     lambdaHashingVersion: '20201221',
   },
+  resources: {
+    Resources: {
+      SQSQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'catalogItemsQueue',
+        },
+      },
+      SNSTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'createProductTopic',
+        },
+      },
+      SNSSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '5925520@gmail.com',
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'SNSTopic',
+          },
+        },
+      },
+    },
+  },
   // import the function via paths
-  functions: { importProductsFile, importFileParser },
+  functions: { importProductsFile, importFileParser, catalogBatchProcess },
 };
 
 module.exports = serverlessConfiguration;

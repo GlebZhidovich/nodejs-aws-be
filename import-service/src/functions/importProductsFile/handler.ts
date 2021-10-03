@@ -8,7 +8,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { middyfy } from '@libs/lambda';
 import 'source-map-support/register';
 import { AppError } from '../../libs/appError';
-import { BUCKET_NAME } from '../constats';
+import { BUCKET_NAME, REGION } from '../constats';
 
 export const checkIsCsvFile = (filename: string): boolean => {
   const arrNames = filename.split('.');
@@ -23,7 +23,7 @@ const importProductsFile = async ({
     throw new AppError('Wrong file format', 400);
   }
   const clientParams: S3ClientConfig = {
-    region: 'eu-west-1',
+    region: REGION,
   };
   const getObjectParams: PutObjectCommandInput = {
     Bucket: BUCKET_NAME,
