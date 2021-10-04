@@ -55,6 +55,12 @@ export const sendToSNS = async (products: Product[]) => {
       Subject: 'Product has been added to DB',
       Message: JSON.stringify(product),
       TopicArn: process.env.SNS_ARN,
+      MessageAttributes: {
+        product_price: {
+          DataType: 'Number',
+          StringValue: `${product.price}`,
+        },
+      },
     };
     const command = new PublishCommand(input);
     const response = await client.send(command);

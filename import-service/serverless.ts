@@ -53,6 +53,7 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+
       SQS_URL: {
         Ref: 'SQSQueue',
       },
@@ -83,6 +84,22 @@ const serverlessConfiguration: AWS = {
           Protocol: 'email',
           TopicArn: {
             Ref: 'SNSTopic',
+          },
+          FilterPolicy: {
+            product_price: [{ numeric: ['>', 30] }],
+          },
+        },
+      },
+      SNS2Subscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: '3696732@mail.ru',
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'SNSTopic',
+          },
+          FilterPolicy: {
+            product_price: [{ numeric: ['<', 30] }],
           },
         },
       },
