@@ -6,9 +6,7 @@ import createProduct from '@functions/createProduct';
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
-  disabledDeprecations: [
-    'CLI_OPTIONS_SCHEMA',
-  ],
+  disabledDeprecations: ['CLI_OPTIONS_SCHEMA'],
   frameworkVersion: '2',
   custom: {
     webpack: {
@@ -28,13 +26,16 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-
+      PG_HOST: 'lesson4-database.ch4hqzfhgmw8.eu-west-1.rds.amazonaws.com',
+      PG_PORT: '5432',
+      PG_DATABASE: 'lesson4',
+      PG_USERNAME: 'postgres',
+      PG_PASSWORD: 'XKAFPMfiw29VBhD',
     },
     lambdaHashingVersion: '20201221',
   },
   // import the function via paths
   functions: { getProductsList, getProductsById, createProduct },
-
 };
 
 module.exports = serverlessConfiguration;
