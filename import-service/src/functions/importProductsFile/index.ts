@@ -8,7 +8,7 @@ export default {
         method: 'get',
         path: 'import/{filename}',
         cors: true,
-      }
-    }
-  ]
-}
+      },
+    },
+  ],
+};
