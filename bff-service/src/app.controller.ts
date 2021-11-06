@@ -30,13 +30,23 @@ export class AppController {
 
     const recipientURL = process.env[recipient];
     if (recipientURL) {
-      const value: string = await this.cacheManager.get(originalUrl);
-      if (value) {
-        return value;
+      const isSaveProducts = method === 'GET' && recipient === 'products';
+      if (isSaveProducts) {
+        const value: string = await this.cacheManager.get(originalUrl);
+        if (value) {
+          return value;
+        }
       }
+
       const url = `${recipientURL}${originalUrl}`;
-      const result = this.appService.makeRequest(url, method as Method, body);
-      await this.cacheManager.set(originalUrl, result, { ttl: 2000 });
+      const result = await this.appService.makeRequest(
+        url,
+        method as Method,
+        body,
+      );
+      if (isSaveProducts) {
+        await this.cacheManager.set(originalUrl, result, { ttl: 2000 });
+      }
       return result;
     }
     throw new HttpException('Cannot process request', HttpStatus.BAD_GATEWAY);

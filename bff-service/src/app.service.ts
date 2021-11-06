@@ -3,13 +3,9 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { AxiosError, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
-const ONE_MIN = 60000;
 @Injectable()
 export class AppService {
   constructor(private httpService: HttpService) {}
-
-  private products: any[];
-  time: number;
 
   async makeRequest(url: string, method: Method, body: any): Promise<string> {
     const config: AxiosRequestConfig = {
