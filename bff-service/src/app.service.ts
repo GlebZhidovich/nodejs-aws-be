@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, Injectable } from '@nestjs/common';
-import { AxiosError, AxiosResponse, Method, AxiosRequestConfig } from 'axios';
-import { lastValueFrom, map } from 'rxjs';
+import { AxiosError, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AppService {
@@ -17,13 +17,11 @@ export class AppService {
       config.data = body;
     }
 
-    const request$ = this.httpService
-      .request(config)
-      .pipe(map((res) => res.data));
+    const request$ = this.httpService.request(config);
 
     try {
       const response: AxiosResponse = await lastValueFrom(request$);
-      return JSON.stringify(response.data ? response.data : response, null, 2);
+      return JSON.stringify(response.data, null, 2);
     } catch (err) {
       const error = (err as AxiosError).response;
       throw new HttpException(error.statusText, error.status);
