@@ -19,12 +19,13 @@ export class AppController {
     console.log('originalUrl', originalUrl);
     console.log('method', method);
     console.log('body', body);
-    const [url, query] = originalUrl.split('?');
+    const [url] = originalUrl.split('?');
     const recipient = url.split('/')[1];
 
     const recipientURL = process.env[recipient];
     if (recipientURL) {
-      return this.appService.makeRequest(recipientURL, method as Method, body);
+      const url = `${recipientURL}${originalUrl}`;
+      return this.appService.makeRequest(url, method as Method, body);
     }
     throw new HttpException('Cannot process request', HttpStatus.BAD_GATEWAY);
   }
