@@ -12,6 +12,7 @@ import { Method } from 'axios';
 import { AppService } from './app.service';
 import { Cache } from 'cache-manager';
 
+const CACHE_TIME = 120;
 @Controller('*')
 export class AppController {
   constructor(
@@ -45,7 +46,7 @@ export class AppController {
         body,
       );
       if (isSaveProducts) {
-        await this.cacheManager.set(originalUrl, result, { ttl: 2000 });
+        await this.cacheManager.set(originalUrl, result, { ttl: CACHE_TIME });
       }
       return result;
     }

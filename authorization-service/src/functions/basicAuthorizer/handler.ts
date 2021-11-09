@@ -22,6 +22,11 @@ const generatePolicy = (
   };
 };
 
+const isValidCredentials = (str: string): boolean => {
+  const [name, password] = str.split('=');
+  return name === 'GlebZhidovich' && password === process.env.GlebZhidovich;
+};
+
 const basicAuthorizer: Handler = async (event, cts, cb) => {
   if (event.type !== 'TOKEN') {
     cb('Unauthorized');
@@ -30,9 +35,8 @@ const basicAuthorizer: Handler = async (event, cts, cb) => {
   try {
     const payload = event.authorizationToken.split(' ')[1];
     const decoding = Buffer.from(payload, 'base64').toString('ascii');
-    const { GlebZhidovich } = JSON.parse(decoding);
-    const effect =
-      process.env.GlebZhidovich === GlebZhidovich ? 'Allow' : 'Deny';
+    const effect = isValidCredentials(decoding) ? 'Allow' : 'Deny';
+
     const policy = generatePolicy(payload, event.methodArn, effect);
     cb(null, policy);
   } catch (e) {
